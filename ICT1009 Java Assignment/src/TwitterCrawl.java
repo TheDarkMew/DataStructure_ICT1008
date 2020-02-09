@@ -4,6 +4,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.opencsv.CSVWriter;
+
 import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
 
@@ -22,35 +24,45 @@ public class TwitterCrawl {
 		this.cb.setDebugEnabled(true).setOAuthConsumerKey("uxP2xkp0iGQP7UKB70PuD4bNe")
 				.setOAuthConsumerSecret("nZObs8qkpACDNCt8v9ZsikgXdU22aeU3ChfHZdG6B7FMDQheyc")
 				.setOAuthAccessToken("221371528-gyQixF6MxPB79o2FB66E0llBP6rG5UJ31G2EVHZN")
-				.setOAuthAccessTokenSecret("rntSl0F6SDTcxu4JxbXa4gEwKfPXy7FrYLrWoatDwmvfF");
+				.setOAuthAccessTokenSecret("rntSl0F6SDTcxu4JxbXa4gEwKfPXy7FrYLrWoatDwmvfF")
+				.setTweetModeExtended(true);
 		this.tf = new TwitterFactory(cb.build());
 		this.twitter = tf.getInstance();
 	}
 
 	public void crawlTwitter() throws TwitterException, IOException {
 		// opens file
-		FileWriter fileWriter = new FileWriter("twitter.txt");
-		PrintWriter printWriter = new PrintWriter(fileWriter);
+		FileWriter fileWriter = new FileWriter("twitter.csv");
+		CSVWriter writer = new CSVWriter(fileWriter);
+		//writes the csv header text
+		String[] header = {"Username", "Retweets", "Favourites", "Post"};
+		writer.writeNext(header);
+		//PrintWriter printWriter = new PrintWriter(fileWriter);
 		// creates the query to search for
-		Query userSearchQuery = new Query(this.query);
+		Query userSearchQuery = new Query(this.query); //+ " +exclude:retweets"
 		userSearchQuery.setCount(100);
 		userSearchQuery.setSince("2020-01-25");
-
+		//searches
 		QueryResult result = twitter.search(userSearchQuery);
 
 		this.crawledTweets = result.getTweets();
 		for (Status status : crawledTweets) {
-			/*
-			 * System.out.println("@" + status.getUser().getScreenName() + ":");
-			 * System.out.println(status.getText()); System.out.println("Retweets: "+
-			 * status.getRetweetCount()); System.out.println("Favourites: "+
-			 * status.getFavoriteCount()+"\n\n\n");
-			 */
-			printWriter.print("@" + status.getUser().getScreenName() + ":\n");
-			printWriter.print(status.getText() + "\n");
-			printWriter.print("Retweets: " + status.getRetweetCount() + "\n");
-			printWriter.print("Favourites: " + status.getFavoriteCount() + "\n\n");
+			String tweetText;
+			String favCount;
+			String rtCount;
+			if (status.getRetweetedStatus() != null) {
+                tweetText = status.getRetweetedStatus().getText();
+                favCount = String.valueOf(status.getRetweetedStatus().getFavoriteCount());
+            	rtCount = String.valueOf(status.getRetweetedStatus().getRetweetCount());
+            } 
+			else {
+            	tweetText = status.getText();
+            	favCount = String.valueOf(status.getFavoriteCount());
+            	rtCount = String.valueOf(status.getRetweetCount());
+            }
+			String[] tweet = {status.getUser().getScreenName(), rtCount , favCount, tweetText};
+			writer.writeNext(tweet);
 		}
-		printWriter.close();
+		writer.close();
 	}
 }
