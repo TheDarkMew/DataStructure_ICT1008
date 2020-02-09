@@ -1,88 +1,85 @@
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+
+import com.opencsv.CSVWriter;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.List;
 
 public class Reddit {
 	private Document doc;
-	// FileWriter fileWriter;
-	// PrintWriter printWriter;
 
 	public Reddit(String query) throws IOException {
-		this.doc = Jsoup.connect("https://old.reddit.com/search/?q=" + query).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36").get();
-		// this.fileWriter = new FileWriter("java\\reddit.txt");
-		// this.printWriter = new PrintWriter(fileWriter);
+		this.doc = Jsoup.connect("https://old.reddit.com/search/?q=" + query)
+				.userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36")
+				.get();
 	}
 
 	public void crawlReddit() throws IOException {
-		FileWriter fileWriter = new FileWriter("reddit.txt");
-		PrintWriter printWriter = new PrintWriter(fileWriter);
+		FileWriter fileWriter = new FileWriter("reddit.csv");
+		CSVWriter writer = new CSVWriter(fileWriter);
 		System.out.println("==========CRAWLING REDDIT SEARCH==========");
-		Elements searchResults = doc.select(
-				"div.search-result-link header.search-result-header > a[href], div.search-result-link div.search-result-meta > span,  span.search-time > time[title]")
-				.not("span.search-result-icon"); // looks for links under the search results for links' header.
-		if (searchResults.isEmpty()) {
-			System.out.println("FUCK");
+		
+		//headers to the csv to mark start and stop
+		String[] csvHeader = {"Title", "Score", "Date", "Author", "Subreddit"};
+		writer.writeNext(csvHeader);
+		String[] commentHeader = {"Username", "Score", "Date", "Comment"};
+		String [] startPost = {"START POST"};
+		String [] endPost = {"END POST"};
+		
+		//pulling the post details from the Document
+		List<String> postTitles = this.doc.select("div.search-result-link header.search-result-header > a[href]").eachText();
+		List<String> postLinks = this.doc.select("div.search-result-link header.search-result-header > a[href]").eachAttr("href");
+		List<String> postTimeStamps = this.doc.select("span.search-time > time[title]").eachAttr("title");
+		List<String> postPoints = this.doc.select("div.search-result-link div.search-result-meta > span.search-score").eachText();
+		List<String> postAuthors = this.doc.select("div.search-result-link div.search-result-meta > span.search-author > a.author").eachText();
+		List<String> postSubs = this.doc.select("div.search-result-meta > span > a.search-subreddit-link").eachText();
+		
+		//writing to CSV
+		for (int i = 0; i < postTitles.size(); i++) {
+			//prints post header
+			writer.writeNext(startPost);
+			//prints post to csv
+			String[] postContent = {postTitles.get(i), postPoints.get(i), postTimeStamps.get(i), postAuthors.get(i), postSubs.get(i)};
+			writer.writeNext(postContent);
+			//writes header for comments
+			writer.writeNext(commentHeader);
+			//crawl comments to print comments
+			System.out.println("====CRAWLING " + postTitles.get(i) + "======");
+			crawlComments(postLinks.get(i)+"?sort=confidence&limit=500", writer);
+			writer.writeNext((endPost));
 		}
-		int i = 1; // index of posts
-		String url = "";
-		System.out.println(searchResults.size());
-		for (Element result : searchResults) {
-			// title, (blank?), points, exact post timestamp, OP, subreddit
-			if (result.tagName().equals("a") || i == searchResults.size() + 1) {
-				if (i != 1) {
-					System.out.println((i));
-					printWriter.print("\nComments:\n");
-					crawlComments(url, printWriter);
-				}
-				// System.out.println("\n==================================POST=======================================================");
-				// System.out.println("Post Title: " + result.text());
-				printWriter.print("Post Title: " + result.text() + "\n");
-				url = result.attr("abs:href");
-			} else if (result.tagName().equals("time")) {
-				// System.out.println("Posted on: " + result.attr("title"));
-				printWriter.print("Posted on: " + result.attr("title") + "\n");
-			} else {
-				// System.out.println(result.text());
-				printWriter.print(result.text() + "\n");
-			}
-			i++;
-		}
-		printWriter.close();
+		//closes file output
+		writer.close();
+		fileWriter.close();
 	}
 
-	public void crawlComments(String url, PrintWriter printWriter) throws IOException {
-		System.out.println("==========CRAWLING COMMENTS==========");
+	public void crawlComments(String url, CSVWriter writer) throws IOException {
 		Document commentsPage = Jsoup.connect(url).userAgent(
 				"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36")
 				.get();
-		Elements comments = commentsPage.select(
-				"div.commentarea p.tagline > a.author, p.tagline > span.author, p.tagline > span.unvoted, div.commentarea p.tagline > time[title], div.thing div.usertext-body div.md > p");
-		for (Element comment : comments) {
-			// every 2 elements: commenter username, comment
-			if (comment.tagName().equals("a")) {
-				// System.out.println("\nComment by: " + comment.text());
-				printWriter.print("\nComment by: " + comment.text() + "\n");
-			} else if (comment.tagName().equals("time")) {
-				// System.out.println("Posted: " + comment.attr("title"));
-				printWriter.print("Posted on: " + comment.attr("title") + "\n");
-			} else if (comment.tagName().equals("span")) {
-				if (comment.attr("class").equals("score unvoted")) {
-					// System.out.println("Score: "+ comment.text());
-					printWriter.print("Comment Score: " + comment.text() + "\n");
-				} else {
-					// System.out.println("\nDeleted Comment: " +comment.text());
-					printWriter.print("\nDeleted Comment: " + comment.text() + "\n");
-				}
-			} else {
-				// System.out.println(comment.text());
-				printWriter.print(comment.text() + "\n");
-			}
+		
+		//headers to mark start and stop of comment section
+		String [] startComment = {"START COMMENTS"};
+		writer.writeNext(startComment);
+		String [] endComment = {"END COMMENTS"};
+		
+		//extracting comments from comments page
+		List<String> commentAuthor = commentsPage.select("div.commentarea div.comment p.tagline > a.author, div.commentarea div.comment p.tagline > span.author").not("div.commentarea div.comment div.deleted").eachText();
+		List<String> commentScore = commentsPage.select("div.commentarea div.comment p.tagline > span.score, div.commentarea div.comment p.tagline > span.score-hidden").not("div.commentarea div.comment div.deleted, span.likes, span.dislikes").eachText();
+		List<String> commentDate = commentsPage.select("div.commentarea div.comment p.tagline > time").not("time.edited-timestamp, div.commentarea div.comment div.deleted").eachAttr("title");
+		List<String> commentText = commentsPage.select("div.commentarea div.comment form.usertext div.md").not("div.commentarea div.comment div.deleted").eachText();
+		
+		System.out.println(commentAuthor.size());
+		System.out.println(commentScore.size());
+		System.out.println(commentDate.size());
+		System.out.println(commentText.size());
+		
+		for (int i = 0; i < commentAuthor.size(); i++) {
+			String[] comment = {commentAuthor.get(i), commentScore.get(i), commentDate.get(i), commentText.get(i)};
+			writer.writeNext(comment);
 		}
-		printWriter.print("\n");
+		writer.writeNext(endComment);
 	}
 }
