@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Scanner;
 
@@ -27,6 +29,21 @@ public class Analyzer {
 		//calling this will start analysis
 		initSentimentAnalyzer(rPosts, tPosts);
 		initWordCloud();
+		initStatisticsAnalyzer(rPosts, tPosts);
+	}
+	//init method for Statistics Analysis - Juve
+	public void initStatisticsAnalyzer(List<RedditPost> rPosts, List<TwitterPost> tPosts) {
+		StatisticsAnalyzer s = new StatisticsAnalyzer(rPosts, tPosts);
+		String popularSubreddit = s.getPopularSubreddit();
+		RedditPost popularPost = s.getBestRedditPost();
+		RedditComment popularComment = s.getBestRedditComment();
+		TwitterPost popularTweet = s.getBestTwitterPost();
+		TwitterPost popularRT = s.getMostRTPost();
+		int[] redditStats = s.redditPostGeneralStats(); //total posts, total comments, total post upvotes, total comment upvotes
+		int[] twitterStats = s.twitterPostGeneralStats(); //total posts, total favs, total retweets
+		
+		//display the data
+		
 	}
 	
 	//init method for Sentiment Analysis - Kin Seong
@@ -80,6 +97,121 @@ public class Analyzer {
 	}
 	
 	//Init method for statistical analysis - Joel
+}
+
+class StatisticsAnalyzer{
+	List<RedditPost> redditPosts;
+	List<TwitterPost> twitterPosts;
+	public StatisticsAnalyzer(List<RedditPost> rPosts, List<TwitterPost> tPosts) {
+		this.redditPosts = rPosts;
+		this.twitterPosts = tPosts;
+	}
+	
+	public RedditPost getBestRedditPost() {
+		RedditPost bestPost;
+		int postScore = 0;
+		for (RedditPost posts : this.redditPosts) {
+			if (posts.getLikeCount() > postScore) {
+				postScore = posts.getLikeCount();
+				bestPost = posts;
+			}
+		}
+		return bestPost;
+	}
+	
+	public RedditComment getBestRedditComment() {
+		RedditComment bestComment;
+		int commentScore = 0;
+		for (RedditPost posts : this.redditPosts) {
+			for (RedditComment rc : posts.getCommentList()) {
+				if (rc.getCommentScore() > commentScore) {
+					commentScore = posts.getLikeCount();
+					bestComment = rc;
+				}
+			}
+		}
+		return bestComment;
+	}
+	
+	public String getPopularSubreddit() {
+		Map<String, Integer> popSub = new HashMap<String, Integer>();
+		for (RedditPost posts : this.redditPosts) {
+			if(!popSub.containsKey(posts.getPostSubreddit())) {
+				popSub.put(posts.getPostSubreddit(), 1);
+			}
+			else {
+				int currval = popSub.get(posts.getPostSubreddit());
+				popSub.replace(posts.getPostSubreddit(), currval +1);
+			}
+		}
+		
+		Entry<String, Integer> max = null;
+		
+		for (Entry<String, Integer> mx : popSub.entrySet()) {
+			if (mx.getValue() > max.getValue()) {
+				max = mx;
+			}
+		}
+		
+		return max.getKey();
+	}
+	
+	public TwitterPost getBestTwitterPost() {
+		TwitterPost bestPost;
+		int postScore = 0;
+		for (TwitterPost posts : this.twitterPosts) {
+			if (posts.getLikeCount() > postScore) {
+				postScore = posts.getLikeCount();
+				bestPost = posts;
+			}
+		}
+		return bestPost;
+	}
+	
+	public TwitterPost getMostRTPost() {
+		TwitterPost bestPost;
+		int postScore = 0;
+		for (TwitterPost posts : this.twitterPosts) {
+			if (posts.getRTCount() > postScore) {
+				postScore = posts.getRTCount();
+				bestPost = posts;
+			}
+		}
+		return bestPost;
+	}
+	
+	public int[] redditPostGeneralStats() {
+		int postScore = 0;
+		int commentScore = 0;
+		int totalPosts = this.redditPosts.size();
+		int totalComments = 0;
+		
+		for (RedditPost rp : this.redditPosts) {
+			postScore += rp.getLikeCount();
+			totalComments = rp.getCommentList().size();
+			for (RedditComment rc : rp.getCommentList()) {
+				commentScore += rc.getCommentScore();
+			}
+		}
+		
+		int[] stats = {totalPosts, totalComments, postScore, commentScore};
+		return stats;
+	}
+	
+	public int[] twitterPostGeneralStats() {
+		int postLikes = 0;
+		int postRTs = 0;
+		int totalPosts = this.twitterPosts.size();
+		
+		for (TwitterPost tp : this.twitterPosts) {
+			postLikes += tp.getLikeCount();
+			postRTs += tp.getRTCount();
+		}
+		
+		int[] stats = {totalPosts, postLikes, postRTs};
+		return stats;
+	}
+	
 }
 
 class SentimentAnalyzer {
