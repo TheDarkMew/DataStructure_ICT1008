@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.ProjectController">
+   <children>
+      <MenuBar layoutY="-2.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Export CSV" />
+                  <MenuItem mnemonicParsing="false" text="Export Image" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <TabPane layoutY="30.0" prefHeight="370.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+        <tabs>
+          <Tab text="Statistics">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <SplitPane dividerPositions="0.5518394648829431" layoutX="-1.0" prefHeight="331.0" prefWidth="615.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-1.0" AnchorPane.rightAnchor="-14.0" AnchorPane.topAnchor="0.0">
+                          <items>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                 <children>
+                                    <LineChart layoutX="-112.0" layoutY="-71.0" prefHeight="329.0" prefWidth="275.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                      <xAxis>
+                                        <CategoryAxis side="BOTTOM" />
+                                      </xAxis>
+                                      <yAxis>
+                                        <NumberAxis side="LEFT" />
+                                      </yAxis>
+                                    </LineChart>
+                                 </children>
+                              </AnchorPane>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                 <children>
+                                    <Button layoutX="103.0" layoutY="284.0" mnemonicParsing="false" onAction="#loadStatsBtn" text="Load" />
+                                 </children>
+                              </AnchorPane>
+                          </items>
+                        </SplitPane>
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+          <Tab text="Reddit Comments">
+               <content>
+                  <TableView fx:id="reddittableView" prefHeight="200.0" prefWidth="200.0">
+                    <columns>
+                      <TableColumn fx:id="commentsColumn" prefWidth="109.0" text="Comments" />
+                      <TableColumn fx:id="userColumn" prefWidth="94.0" text="User" />
+                        <TableColumn fx:id="pointsColumn" prefWidth="74.0" text="Points" />
+                    </columns>
+                  </TableView>
+               </content>
+          </Tab>
+            <Tab text="Twitter Comments">
+               <content>
+                  <TableView fx:id="twittertableView" prefHeight="331.0" prefWidth="600.0">
+                    <columns>
+                      <TableColumn fx:id="firstNameColumn" prefWidth="89.0" text="FirstName" />
+                      <TableColumn fx:id="lastNameColumn" prefWidth="90.0" text="LastName" />
+                        <TableColumn fx:id="birthdayColumn" minWidth="5.0" prefWidth="76.0" text="Birthday" />
+                        <TableColumn fx:id="genderColumn" prefWidth="69.0" text="Gender" />
+                        <TableColumn fx:id="professionColumn" prefWidth="100.0" text="Profession" />
+                    </columns>
+                  </TableView>
+               </content></Tab>
+            <Tab text="WordCloud">
+               <content>
+                  <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                     <children>
+                        <ImageView pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</AnchorPane>
