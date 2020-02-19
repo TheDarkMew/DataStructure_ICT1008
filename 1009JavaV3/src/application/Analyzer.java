@@ -16,10 +16,10 @@ import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Scanner;
 
-import com.google.cloud.language.v1.Document;
-import com.google.cloud.language.v1.Document.Type;
-import com.google.cloud.language.v1.LanguageServiceClient;
-import com.google.cloud.language.v1.Sentiment;
+//import com.google.cloud.language.v1.Document;
+//import com.google.cloud.language.v1.Document.Type;
+//import com.google.cloud.language.v1.LanguageServiceClient;
+//import com.google.cloud.language.v1.Sentiment;
 
 import javafx.util.Pair;
 
@@ -27,8 +27,8 @@ public class Analyzer {
 	
 	public Analyzer(List<RedditPost> rPosts, List<TwitterPost> tPosts) throws Exception {
 		//calling this will start analysis
-		initSentimentAnalyzer(rPosts, tPosts);
-		initWordCloud();
+		//initSentimentAnalyzer(rPosts, tPosts);
+		//initWordCloud();
 		initStatisticsAnalyzer(rPosts, tPosts);
 	}
 	//init method for Statistics Analysis - Juve
@@ -43,7 +43,24 @@ public class Analyzer {
 		int[] twitterStats = s.twitterPostGeneralStats(); //total posts, total favs, total retweets
 		
 		//display the data
-		
+		System.out.println("Popular Post:");
+		System.out.println(popularPost.getPostContent());
+		System.out.println(popularPost.getLikeCount());
+		System.out.println(popularPost.getPostCommentCount());
+		System.out.println("Popular Comment:");
+		System.out.println(popularComment.getCommentText());
+		System.out.println(popularComment.getCommentScore());
+		System.out.println("Popular Subreddit: "+ popularSubreddit);
+		System.out.println("Popular Tweet");
+		System.out.println(popularTweet.getPostContent());
+		System.out.println(popularTweet.getLikeCount());
+		System.out.println("Popular RT:");
+		System.out.println(popularRT.getPostContent());
+		System.out.println(popularRT.getRTCount());
+		System.out.println("Reddit Stats");
+		//System.out.println(redditStats);
+		System.out.println("Twitter Stats");
+		//System.out.println(twitterStats);
 	}
 	
 	//init method for Sentiment Analysis - Kin Seong
@@ -108,7 +125,7 @@ class StatisticsAnalyzer{
 	}
 	
 	public RedditPost getBestRedditPost() {
-		RedditPost bestPost;
+		RedditPost bestPost = null;
 		int postScore = 0;
 		for (RedditPost posts : this.redditPosts) {
 			if (posts.getLikeCount() > postScore) {
@@ -120,7 +137,7 @@ class StatisticsAnalyzer{
 	}
 	
 	public RedditComment getBestRedditComment() {
-		RedditComment bestComment;
+		RedditComment bestComment = null;
 		int commentScore = 0;
 		for (RedditPost posts : this.redditPosts) {
 			for (RedditComment rc : posts.getCommentList()) {
@@ -136,28 +153,30 @@ class StatisticsAnalyzer{
 	public String getPopularSubreddit() {
 		Map<String, Integer> popSub = new HashMap<String, Integer>();
 		for (RedditPost posts : this.redditPosts) {
-			if(!popSub.containsKey(posts.getPostSubreddit())) {
-				popSub.put(posts.getPostSubreddit(), 1);
+			if(popSub.containsKey(posts.getPostSubreddit())) {
+				int currval = popSub.get(posts.getPostSubreddit());
+				popSub.put(posts.getPostSubreddit(), currval +1);
 			}
 			else {
-				int currval = popSub.get(posts.getPostSubreddit());
-				popSub.replace(posts.getPostSubreddit(), currval +1);
+				popSub.put(posts.getPostSubreddit(), 1);
 			}
 		}
 		
-		Entry<String, Integer> max = null;
+		int occurrence = 0;
+		String max = null;
 		
-		for (Entry<String, Integer> mx : popSub.entrySet()) {
-			if (mx.getValue() > max.getValue()) {
-				max = mx;
+		for (Map.Entry<String, Integer> subs : popSub.entrySet()) {
+			if (subs.getValue() > occurrence) {
+				occurrence = subs.getValue();
+				max = subs.getKey();
 			}
 		}
 		
-		return max.getKey();
+		return max;
 	}
 	
 	public TwitterPost getBestTwitterPost() {
-		TwitterPost bestPost;
+		TwitterPost bestPost = null;
 		int postScore = 0;
 		for (TwitterPost posts : this.twitterPosts) {
 			if (posts.getLikeCount() > postScore) {
@@ -169,7 +188,7 @@ class StatisticsAnalyzer{
 	}
 	
 	public TwitterPost getMostRTPost() {
-		TwitterPost bestPost;
+		TwitterPost bestPost = null;
 		int postScore = 0;
 		for (TwitterPost posts : this.twitterPosts) {
 			if (posts.getRTCount() > postScore) {
@@ -188,7 +207,7 @@ class StatisticsAnalyzer{
 		
 		for (RedditPost rp : this.redditPosts) {
 			postScore += rp.getLikeCount();
-			totalComments = rp.getCommentList().size();
+			totalComments += rp.getCommentList().size();
 			for (RedditComment rc : rp.getCommentList()) {
 				commentScore += rc.getCommentScore();
 			}
