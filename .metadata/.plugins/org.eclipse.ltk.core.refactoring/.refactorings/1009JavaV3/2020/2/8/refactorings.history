@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;wordcloud.txt&apos; to &apos;CoreNLP-master/sentiment/edu.stanford&apos;&#x0D;&#x0A;- Original project: &apos;1009JavaV3&apos;&#x0D;&#x0A;- Destination element: &apos;CoreNLP-master/sentiment/edu.stanford&apos;&#x0D;&#x0A;- Original element: &apos;wordcloud.txt&apos;" description="Copy file" destination="=CoreNLP-master/sentiment&lt;edu.stanford" element1="wordcloud.txt" files="1" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1582096960417" units="0" version="1.0"/>
+</session>

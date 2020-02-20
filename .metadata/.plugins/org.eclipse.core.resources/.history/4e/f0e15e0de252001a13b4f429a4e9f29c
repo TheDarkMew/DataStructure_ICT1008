@@ -1,0 +1,51 @@
+package edu.stanford;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
+
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
+import edu.stanford.nlp.pipeline.CoreDocument;
+import edu.stanford.nlp.pipeline.CoreSentence;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.logging.RedwoodConfiguration;
+
+public class Sentiment {
+	
+	public static void genSentiment(String text) {
+		
+		Properties props = new Properties();
+		 props.setProperty("annotators", "tokenize, ssplit, parse, sentiment");
+		 StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+		 
+		 
+		 CoreDocument coreDocument = new CoreDocument(text);
+		 pipeline.annotate(coreDocument);
+		 
+		 
+		 List<CoreSentence> sentences = coreDocument.sentences();
+		 
+		 
+		 for(CoreSentence sentence : sentences) {
+			String sentiment = sentence.sentiment();
+			
+			System.out.println(sentiment);
+		 }
+		
+	}
+
+	public static void main(String[] args) throws IOException, ClassNotFoundException{
+		
+		RedwoodConfiguration.current().clear().apply(); 
+		
+		 String test[] = {"I hate uni life.","I wonder what is life.","I love my bb"};	
+		 
+		 for(int i = 0 ; i < test.length;i++) {
+			 genSentiment(test[i]);
+		 }
+		
+}
+
+}

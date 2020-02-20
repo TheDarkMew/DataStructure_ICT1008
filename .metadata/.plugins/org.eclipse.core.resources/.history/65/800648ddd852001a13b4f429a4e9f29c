@@ -1,0 +1,17 @@
+package edu.stanford;
+
+public class Sentiment {
+
+	public static void main(String[] args) throws IOException, ClassNotFoundException{
+		
+		 Properties props = new Properties();
+		    props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+		    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
+		
+		
+		
+		
+}
+
+}
