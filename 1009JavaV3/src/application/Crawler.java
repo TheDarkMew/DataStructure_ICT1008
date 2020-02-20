@@ -180,7 +180,7 @@ public class Crawler {
 //		int csize2 = Math.min(commentScore.size(), commentDate.size());
 //		int lsize = Math.min(csize1, csize2);
 		
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 10; i++) {
 			//check for specific instances where comment score is hidden (moderator announcements, deleted accounts etc), in which they are set to 0 points.
 			int points;
 			String author = commentAuthor.get(i);
@@ -239,7 +239,7 @@ public class Crawler {
 		writer.writeNext(header);
 		// creates the query to search for
 		Query userSearchQuery = new Query("(rip kobe bryant) OR (rip black mamba) OR (black mamba forever) OR (black mamba) OR (kobe bryant)");
-		userSearchQuery.setCount(100);
+		userSearchQuery.setCount(25);
 		userSearchQuery.setSince("2020-01-25");
 		//searches twitter using the query
 		QueryResult result = null;

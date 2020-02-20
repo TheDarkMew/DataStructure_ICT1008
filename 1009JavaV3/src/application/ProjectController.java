@@ -165,20 +165,24 @@ public class ProjectController extends Application implements Initializable{
         textArea.appendText("Post Date: "+popularRT.getPostDate()+"\n");
 	}
 	
-	//initialize columns with variables as cells from testTable.java and testRedditTable.java
-	//set both tables with readCSV() and readCSV2 method
-    public void initialize(URL location, ResourceBundle resources) 
-    { 	
-    	
+	public void startCrawling() {
 		try {
-			c = new Crawler();
-			tpost = c.getTwitterPosts();
-			rpost = c.getRedditPosts();
+			this.c = new Crawler();
+			this.tpost = c.getTwitterPosts();
+			this.rpost = c.getRedditPosts();
 			this.a = new Analyzer(rpost, tpost);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	//initialize columns with variables as cells from testTable.java and testRedditTable.java
+	//set both tables with readCSV() and readCSV2 method
+    public void initialize(URL location, ResourceBundle resources) 
+    { 	
+    	startCrawling();
+		
     	userNameColumn.setCellValueFactory(new PropertyValueFactory<testTable, String>("userName"));
     	retweetsColumn.setCellValueFactory(new PropertyValueFactory<testTable, Integer>("retweets"));
     	favouritesColumn.setCellValueFactory(new PropertyValueFactory<testTable, Integer>("favourites"));

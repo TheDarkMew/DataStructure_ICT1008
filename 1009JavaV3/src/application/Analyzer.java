@@ -56,23 +56,28 @@ public class Analyzer {
 //		this.popularRT = s.getMostRTPost();
 //		this.redditStats = s.redditPostGeneralStats(); //total posts, total comments, total post upvotes, total comment upvotes
 //		this.twitterStats = s.twitterPostGeneralStats(); //total posts, total favs, total retweets
-		int [] sentstats = {0,0,0,0,0};
-		RedditPost bestPost = null;
-		RedditComment bestComment = null;
-		Map<String, Integer> popSub = new HashMap<String, Integer>();
-		int postScore = 0;
-		int commentScore = 0;
-		int totalRScore = 0;
-		int totalCommentScore = 0;
-		int totalRComments = 0;
+		int [] sentstats = {0,0,0,0,0}; //sentiment stats counter
+		RedditPost bestPost = null; //best reddit post
+		RedditComment bestComment = null; //best reddit comment
+		Map<String, Integer> popSub = new HashMap<String, Integer>(); //hashmap to find most popular subreddit
+		int postScore = 0; //best post upvote counter
+		int commentScore = 0; //best comment upvote counter
+		int totalRScore = 0; //total reddit post upvote counter
+		int totalCommentScore = 0; //total reddit comment upvote counter
+		int totalRComments = 0; // total reddit comments counter
 		for (RedditPost posts : rPosts) {
+			//increment total reddit post upvotes counter
 			totalRScore += posts.getLikeCount();
+			//increment total comments counter
 			totalRComments += posts.getCommentList().size();
 			int upvotes = posts.getLikeCount();
 			if (upvotes > postScore) {
+				//sets best post score
 				postScore = upvotes;
+				//sets best post
 				bestPost = posts;
 			}
+			//checking subreddit popularity
 			String sub = posts.getPostSubreddit();
 			if(popSub.containsKey(sub)) {
 				int currval = popSub.get(sub);
@@ -81,13 +86,18 @@ public class Analyzer {
 			else {
 				popSub.put(sub, 1);
 			}
+			
 			for (RedditComment rc : posts.getCommentList()) {
 				int cscore = rc.getCommentScore();
+				//increments total comment upvotes
 				totalCommentScore += rc.getCommentScore();
 				if (cscore > commentScore) {
+					//set best comment score
 					commentScore = cscore;
+					//set best comment
 					bestComment = rc;
 				}
+				//Sentiment Calculation
 				String textC = rc.getCommentText();
 				String sentC = genSentiment(textC);
 				//comment.setSentiment(sentC);
@@ -109,7 +119,7 @@ public class Analyzer {
 				}
 			}
 		}
-		
+		//checking subreddit popularity
 		int occurrence = 0;
 		String max = null;
 		
@@ -121,25 +131,32 @@ public class Analyzer {
 			}
 		}
 		
-		TwitterPost bestTPost = null;
-		TwitterPost bestRTPost = null;
-		int postTScore = 0;
-		int postRTScore = 0;
-		int postLikes = 0;
-		int postRTs = 0;
+		TwitterPost bestTPost = null; //most favourited tweet
+		TwitterPost bestRTPost = null; //most retweeted
+		int postTScore = 0; //best tweet favs count
+		int postRTScore = 0; //best tweet rt count
+		int postLikes = 0; //total fav count
+		int postRTs = 0; //total rt count
 		for (TwitterPost Tposts : tPosts) {
+			//increment total fav count
 			postLikes += Tposts.getLikeCount();
+			//increment total rt count
 			postRTs += Tposts.getRTCount();
 			int likecount = Tposts.getLikeCount();
 			if (likecount > postTScore) {
+				//set best tweet fav
 				postTScore = likecount;
+				//set best tweet
 				bestTPost = Tposts;
 			}
 			int rtcount = Tposts.getRTCount();
 			if (rtcount > postRTScore) {
+				//set best rt count
 				postRTScore = rtcount;
+				//set best rt
 				bestRTPost = Tposts;
 			}
+			//sentiment analysis for tweet
 			String text = Tposts.getPostContent();
 			String sent = genSentiment(text);
 			//Tposts.setSentiment(sent);
@@ -160,7 +177,7 @@ public class Analyzer {
 				sentstats[4]++;
 			}
 		}
-		
+		//sets everything
 		int[] rStats = {rPosts.size(), totalRComments, totalRScore, totalCommentScore};
 		int[] tStats = {tPosts.size(), postLikes, postRTs};
 		redditStats = rStats;
