@@ -4,12 +4,15 @@ public abstract class Post {
 	private int LikeCount; //also used for reddit upvotes
 	private String username;
 	private String PostDate;
+	private String sentiment;
 	
+
 	public Post(String title, int points, String username, String date) {
 		this.postContent = title;
 		this.LikeCount = points;
 		this.username = username;
 		this.PostDate = date;
+		this.sentiment = null;
 	}
 
 	public String getPostContent() {
@@ -26,5 +29,13 @@ public abstract class Post {
 
 	public String getPostDate() {
 		return PostDate;
+	}
+	
+	public String getSentiment() {
+		return sentiment;
+	}
+
+	public void setSentiment(String sentiment) {
+		this.sentiment = sentiment;
 	}
 }

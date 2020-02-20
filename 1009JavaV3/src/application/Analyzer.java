@@ -13,7 +13,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import edu.stanford.nlp.pipeline.CoreDocument;
+import edu.stanford.nlp.pipeline.CoreSentence;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.util.logging.RedwoodConfiguration;
+
 import java.util.PriorityQueue;
+import java.util.Properties;
 import java.util.Scanner;
 
 //import com.google.cloud.language.v1.Document;
@@ -24,73 +31,93 @@ import java.util.Scanner;
 import javafx.util.Pair;
 
 public class Analyzer {
-	
+	private String popularSubreddit;
+	private RedditPost popularPost;
+	private RedditComment popularComment;
+	private TwitterPost popularTweet;
+	private TwitterPost popularRT;
+	private int[] redditStats; //total posts, total comments, total post upvotes, total comment upvotes
+	private int[] twitterStats; //total posts, total favs, total retweets
+	private int[] sentimentStats; //very pos, pos, neutral, neg, very neg
+ 	
 	public Analyzer(List<RedditPost> rPosts, List<TwitterPost> tPosts) throws Exception {
 		//calling this will start analysis
-		//initSentimentAnalyzer(rPosts, tPosts);
+		initSentimentAnalyzer(rPosts, tPosts);
 		//initWordCloud();
-		initStatisticsAnalyzer(rPosts, tPosts);
+		//initStatisticsAnalyzer(rPosts, tPosts);
 	}
 	//init method for Statistics Analysis - Juve
 	public void initStatisticsAnalyzer(List<RedditPost> rPosts, List<TwitterPost> tPosts) {
 		StatisticsAnalyzer s = new StatisticsAnalyzer(rPosts, tPosts);
-		String popularSubreddit = s.getPopularSubreddit();
-		RedditPost popularPost = s.getBestRedditPost();
-		RedditComment popularComment = s.getBestRedditComment();
-		TwitterPost popularTweet = s.getBestTwitterPost();
-		TwitterPost popularRT = s.getMostRTPost();
-		int[] redditStats = s.redditPostGeneralStats(); //total posts, total comments, total post upvotes, total comment upvotes
-		int[] twitterStats = s.twitterPostGeneralStats(); //total posts, total favs, total retweets
+		popularSubreddit = s.getPopularSubreddit();
+		popularPost = s.getBestRedditPost();
+		popularComment = s.getBestRedditComment();
+		popularTweet = s.getBestTwitterPost();
+		popularRT = s.getMostRTPost();
+		redditStats = s.redditPostGeneralStats(); //total posts, total comments, total post upvotes, total comment upvotes
+		twitterStats = s.twitterPostGeneralStats(); //total posts, total favs, total retweets
 		
-		//display the data
-		System.out.println("Popular Post:");
-		System.out.println(popularPost.getPostContent());
-		System.out.println(popularPost.getLikeCount());
-		System.out.println(popularPost.getPostCommentCount());
-		System.out.println("Popular Comment:");
-		System.out.println(popularComment.getCommentText());
-		System.out.println(popularComment.getCommentScore());
-		System.out.println("Popular Subreddit: "+ popularSubreddit);
-		System.out.println("Popular Tweet");
-		System.out.println(popularTweet.getPostContent());
-		System.out.println(popularTweet.getLikeCount());
-		System.out.println("Popular RT:");
-		System.out.println(popularRT.getPostContent());
-		System.out.println(popularRT.getRTCount());
-		System.out.println("Reddit Stats");
-		//System.out.println(redditStats);
-		System.out.println("Twitter Stats");
-		//System.out.println(twitterStats);
 	}
 	
 	//init method for Sentiment Analysis - Kin Seong
 	public void initSentimentAnalyzer(List<RedditPost> rPosts, List<TwitterPost> tPosts) throws IOException, Exception {
-		// Instantiates a client
-	    
-	    //Insert array of comments under the variable text
-	    String[] text = {"I am so happy with my life","I hate this job"};
-	    ArrayList<String[]> textTuple = new ArrayList<String[]>();
-	    
-	    //loops through list of crawled comments 
-        for(int i = 0;i < text.length;i++) {
-        	SentimentAnalyzer s = new SentimentAnalyzer(text[i]);
-        	String score = String.valueOf(s.getScore());
-        	String magnitude = String.valueOf(s.getMagnitude());
-        	
-        	// each iteration of the loop will create an array with the inputted text, sentiment score 
-        	// and sentiment magnitude
-        	// Sentiment score => -1 -> worst , 0 -> in the middle, 1 -> best
-        	// Sentiment score => strength of the sentiment ( ranging from 0 to inf.) Longer texts usually higher magnitude
-        	String[] myString1= {text[i],score,magnitude}; 
-        	textTuple.add(myString1);
-        }
-        
-        
-        //To test for output
-        for(int i = 0;i < textTuple.size();i++) {
-        	System.out.println(textTuple.get(i)[2]);
-        }
-        
+		int [] stats = {0,0,0,0,0};
+		
+		for(TwitterPost tweet : tPosts) {
+			
+			String text = tweet.getPostContent();
+			//System.out.println(genSentiment(text));
+			String sent = genSentiment(text);
+			tweet.setSentiment(sent);
+			
+			if(sent.equals("Very Positive")) {
+				stats[0]++;
+			}
+			else if(sent.equals("Positive")) {
+				stats[1]++;
+			} 
+			else if(sent.equals("Neutral")) {
+				stats[2]++;
+			}
+			else if(sent.equals("Negative")) {
+				stats[3]++;
+			}
+			else if(sent.equals("Very Negative")) {
+				stats[4]++;
+			}
+		}
+		
+		for (RedditPost post : rPosts) {
+			
+			for (RedditComment comment : post.getCommentList()) {
+				String textC = comment.getCommentText();
+				//System.out.println(textC);
+				String sentC = genSentiment(textC);
+				comment.setSentiment(sentC);
+				
+				if(sentC.equals("Very Positive")) {
+					stats[0]++;
+				}
+				else if(sentC.equals("Positive")) {
+					stats[1]++;
+				} 
+				else if(sentC.equals("Neutral")) {
+					stats[2]++;
+				}
+				else if(sentC.equals("Negative")) {
+					stats[3]++;
+				}
+				else if(sentC.equals("Very Negative")) {
+					stats[4]++;
+				}
+			}
+		}
+		
+		this.sentimentStats = stats;
+		
+		for(int i : stats) {
+			System.out.println(i);
+		}
 	}
 	
 	//Init method for word cloud generation - Boon Kiat
@@ -112,8 +139,55 @@ public class Analyzer {
     	}
     	writer.close();
 	}
-	
-	//Init method for statistical analysis - Joel
+
+	public static String genSentiment(String text) {
+		
+		RedwoodConfiguration.current().clear().apply(); 
+		
+		String sentiment = "";
+		Properties props = new Properties();
+		 props.setProperty("annotators", "tokenize, ssplit, parse, sentiment");
+		 StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+		 
+		 
+		 CoreDocument coreDocument = new CoreDocument(text);
+		 pipeline.annotate(coreDocument);
+		 
+		 
+		 List<CoreSentence> sentences = coreDocument.sentences();
+		 
+		 
+		 for(CoreSentence sentence : sentences) {
+			 sentiment = sentence.sentiment();
+			
+			
+		 }
+		 return sentiment;
+	}
+	public String getPopularSubreddit() {
+		return popularSubreddit;
+	}
+	public RedditPost getPopularPost() {
+		return popularPost;
+	}
+	public RedditComment getPopularComment() {
+		return popularComment;
+	}
+	public TwitterPost getPopularTweet() {
+		return popularTweet;
+	}
+	public TwitterPost getPopularRT() {
+		return popularRT;
+	}
+	public int[] getRedditStats() {
+		return redditStats;
+	}
+	public int[] getTwitterStats() {
+		return twitterStats;
+	}
+	public int[] getSentimentStats() {
+		return sentimentStats;
+	}
 }
 
 class StatisticsAnalyzer{
@@ -233,37 +307,6 @@ class StatisticsAnalyzer{
 	
 }
 
-class SentimentAnalyzer {
-	String text;
-	private Object sentiment;
-	
-	public SentimentAnalyzer(String text) throws IOException, Exception {
-		this.text = text;
-		
-		try (LanguageServiceClient language = LanguageServiceClient.create()) {
-            // The text to analyze
-            Document doc = Document.newBuilder().setContent(text).setType(Type.PLAIN_TEXT).build();
-            // Detects the sentiment of the text
-            Sentiment sentiment = language.analyzeSentiment(doc).getDocumentSentiment();
-            this.sentiment = sentiment;
-  
-        }
-	}
-	
-	public float getScore() {
-		Object s = this.sentiment;
-		
-		return ((Sentiment) s).getScore();
-		
-	}
-	
-	public float getMagnitude() {
-		Object s = this.sentiment;
-		
-		return ((Sentiment) s).getMagnitude();
-		
-	}
-}
 
 class WordCloudAnalyzer {
 	public static HashMap<String, Integer> readFile(String fileName) throws IOException {

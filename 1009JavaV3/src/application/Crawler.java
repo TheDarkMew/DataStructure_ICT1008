@@ -119,7 +119,7 @@ public class Crawler {
 				if (!postCommentCount.get(i).equals("0 comments")) {
 					System.out.println("====CRAWLING " + postTitles.get(i) + "======");
 					try {
-						crawlRedditComments(postLinks.get(i)+"?sort=confidence&limit=500", writer, wcWriter, post);
+						crawlRedditComments(postLinks.get(i)+"?sort=confidence&limit=100", writer, wcWriter, post);
 					} catch (IOException e) {
 						System.out.println("Unable to crawl Reddit comments for data!");
 						redditPosts = null;

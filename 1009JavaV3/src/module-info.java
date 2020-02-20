@@ -4,10 +4,16 @@ module JavaProjectV3 {
 	requires org.jsoup;
 	requires org.twitter4j.core;
 	requires opencsv;
-	requires google.cloud.language;
-	requires proto.google.cloud.language.v1;
 	requires javafx.base;
-	requires proto.google.cloud.language.v1beta2;
+	requires java.logging;
+	requires javax.json;
+	//requires ejml;
+	//requires ejml.simple;
+	requires ejml;
+	requires java.xml;
+	requires protobuf.java;
+
+
 	
 	//opens application to javafx.fxml;
 }
