@@ -182,15 +182,48 @@ public class ProjectController extends Application implements Initializable{
                 new PieChart.Data("Negative", sentimentStats[3]),
                 new PieChart.Data("Very Negative", sentimentStats[4]));
                 
-            pieChart.setData(pieChartData);
+           	pieChart.setData(pieChartData);
         
-            
+           	
+        String popularSubreddit = a.getPopularSubreddit();
+        RedditPost popularPost = a.getPopularPost();
+        RedditComment popularComment = a.getPopularComment();
+        TwitterPost popularTweet = a.getPopularTweet();
+        TwitterPost popularRT = a.getPopularRT();
+        textArea.appendText("Most Popular Subreddit: " + popularSubreddit);
+        textArea.appendText("\nMost Popular Reddit Post:\n");  
+        textArea.appendText("Title: "+popularPost.getPostContent()+"\n");
+        textArea.appendText("Posted By: "+ popularPost.getUsername()+"\n");
+        textArea.appendText("Upvotes: "+popularPost.getLikeCount()+"\n");
+        textArea.appendText("Comments: "+popularPost.getPostCommentCount()+"\n");
+        textArea.appendText("Posted to: "+popularPost.getPostSubreddit()+"\n");
+        textArea.appendText("Post Date: "+popularPost.getPostDate()+"\n\n");
+        textArea.appendText("Most Popular Reddit Comment \n");
+        textArea.appendText("Comment: "+popularComment.getCommentText()+"\n");
+        textArea.appendText("Posted By: "+popularComment.getUsername()+"\n");
+        textArea.appendText("Upvotes: "+popularComment.getCommentScore()+"\n");
+        textArea.appendText("Post Date: "+popularComment.getCommentDate()+"\n");
+        textArea.appendText("Most Favourited Tweet\n");
+        textArea.appendText("Tweet: "+popularTweet.getPostContent()+"\n");
+        textArea.appendText("Posted By: "+popularTweet.getUsername()+"\n");
+        textArea.appendText("Favourites: "+popularTweet.getLikeCount()+"\n");
+        textArea.appendText("RTs: "+popularTweet.getRTCount()+"\n");
+        textArea.appendText("Post Date: "+popularTweet.getPostDate()+"\n");
+        textArea.appendText("Most Retweeted Tweet\n");
+        textArea.appendText("Tweet: "+popularRT.getPostContent()+"\n");
+        textArea.appendText("Posted By: "+popularRT.getUsername()+"\n");
+        textArea.appendText("Favourites: "+popularRT.getLikeCount()+"\n");
+        textArea.appendText("RTs: "+popularRT.getRTCount()+"\n");
+        textArea.appendText("Post Date: "+popularRT.getPostDate()+"\n");
        
         
     }
     
-    public static void main(String[] args) {
-    	launch(args);
-    }    
+	public static void main(String[] args) throws Exception {
+		launch(args);
+	}
+
+
+  
 }
 
