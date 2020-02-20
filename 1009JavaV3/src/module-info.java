@@ -4,8 +4,6 @@ module JavaProjectV3 {
 	requires org.jsoup;
 	requires org.twitter4j.core;
 	requires opencsv;
-	requires javafx.base;
-	requires java.logging;
 	requires javax.json;
 	//requires ejml;
 	//requires ejml.simple;
@@ -15,5 +13,11 @@ module JavaProjectV3 {
 
 
 	
-	//opens application to javafx.fxml;
+	requires java.logging;
+	requires javafx.base;
+	requires javafx.controls;
+	requires javafx.graphics;
+	requires javafx.fxml;
+	
+	opens application to javafx.fxml;
 }

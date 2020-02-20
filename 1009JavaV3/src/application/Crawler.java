@@ -102,24 +102,30 @@ public class Crawler {
 			List<String> postCommentCount = this.doc.select("div.search-result-link div.search-result-meta > a.search-comments").eachText();
 			
 			//writing each REDDIT POST to CSV
-			for (int i = 0; i < postTitles.size(); i++) {
+			for (int i = 0; i < 15; i++) {
 				//sanitises upvotes and commentcount fields which can contain commas for large values and the word "comments/points" in order to save the numerical value as an integer for data processing
 				String points = postPoints.get(i).split(" ")[0].replace(",", "");
 				String commentCount = postCommentCount.get(i).split(" ")[0].replace(",", "");
+				//rest of the items
+				String title = postTitles.get(i);
+				String author = postAuthors.get(i);
+				String dateposted = postTimeStamps.get(i);
+				String subreddit = postSubs.get(i);
+				String link = postLinks.get(i);
 				//saves the post to a RedditPost object
-				RedditPost post = new RedditPost(postTitles.get(i), Integer.parseInt(points), postAuthors.get(i), postTimeStamps.get(i), postSubs.get(i), postLinks.get(i), Integer.parseInt(commentCount));
+				RedditPost post = new RedditPost(title, Integer.parseInt(points), author, dateposted, subreddit, link, Integer.parseInt(commentCount));
 				//prints post header to csv
 				writer.writeNext(startPost);
 				//prints post to csv
-				String[] postContent = {postTitles.get(i), postPoints.get(i), postTimeStamps.get(i), postAuthors.get(i), postSubs.get(i)};
+				String[] postContent = {title, points, dateposted, author, subreddit};
 				writer.writeNext(postContent);
 				//writes header for comments
 				writer.writeNext(commentHeader);
 				//crawl comments to print comments if there are comments present in the post
-				if (!postCommentCount.get(i).equals("0 comments")) {
-					System.out.println("====CRAWLING " + postTitles.get(i) + "======");
+				if (!commentCount.equals("0 comments")) {
+					System.out.println("====CRAWLING " + title + "======");
 					try {
-						crawlRedditComments(postLinks.get(i)+"?sort=confidence&limit=100", writer, wcWriter, post);
+						crawlRedditComments(link+"?sort=top", writer, wcWriter, post);
 					} catch (IOException e) {
 						System.out.println("Unable to crawl Reddit comments for data!");
 						redditPosts = null;
@@ -170,27 +176,32 @@ public class Crawler {
 		List<String> commentDate = commentsPage.select("div.commentarea div.comment p.tagline > time[title]").not("time.edited-timestamp, div.commentarea div.comment div.deleted").eachAttr("title");
 		List<String> commentText = commentsPage.select("div.commentarea div.comment div.usertext-body div.md").not("div.commentarea div.comment div.deleted").eachText();
 		
-		int csize1 = Math.min(commentAuthor.size(), commentText.size());
-		int csize2 = Math.min(commentScore.size(), commentDate.size());
-		int lsize = Math.min(csize1, csize2);
+//		int csize1 = Math.min(commentAuthor.size(), commentText.size());
+//		int csize2 = Math.min(commentScore.size(), commentDate.size());
+//		int lsize = Math.min(csize1, csize2);
 		
-		for (int i = 0; i < lsize; i++) {
+		for (int i = 0; i < 20; i++) {
 			//check for specific instances where comment score is hidden (moderator announcements, deleted accounts etc), in which they are set to 0 points.
 			int points;
+			String author = commentAuthor.get(i);
+			String commentPoints = commentScore.get(i);
+			String date = commentDate.get(i);
+			String commenttxt = commentText.get(i);
 			try {
-				points = Integer.parseInt(commentScore.get(i).split(" ")[0].replace(",", ""));
+				points = Integer.parseInt(commentPoints.split(" ")[0].replace(",", ""));
 			}
 			catch(Exception e) {
 				points = 0;
 			}
+			
 			//creates a comment object that will be stored in the post as a list of comments.
-			RedditComment commentObj = new RedditComment(commentAuthor.get(i), points, commentDate.get(i), commentText.get(i));
+			RedditComment commentObj = new RedditComment(author, points, date, commenttxt);
 			//adds to CSV
-			String[] comment = {commentAuthor.get(i), commentScore.get(i), commentDate.get(i), commentText.get(i)};
+			String[] comment = {author, commentPoints, date, commenttxt};
 			//adds comment to post
 			postname.addComment(commentObj);
 			writer.writeNext(comment);
-			wcwriter.println(commentText.get(i));
+			wcwriter.println(commenttxt);
 		}
 		writer.writeNext(endComment);
 	}
@@ -228,7 +239,7 @@ public class Crawler {
 		writer.writeNext(header);
 		// creates the query to search for
 		Query userSearchQuery = new Query("(rip kobe bryant) OR (rip black mamba) OR (black mamba forever) OR (black mamba) OR (kobe bryant)");
-		userSearchQuery.setCount(300);
+		userSearchQuery.setCount(100);
 		userSearchQuery.setSince("2020-01-25");
 		//searches twitter using the query
 		QueryResult result = null;
@@ -254,6 +265,7 @@ public class Crawler {
 			String favCount;
 			String rtCount;
 			String postDate;
+			String user = status.getUser().getScreenName();
 			//if retweeted, gets original tweet text, favourites and retweets
 			if (status.getRetweetedStatus() != null) {
 				tweetText = status.getRetweetedStatus().getText();
@@ -268,9 +280,9 @@ public class Crawler {
 		    }
 			postDate = status.getCreatedAt().toString();
 			//saves information to twitterpost object
-			TwitterPost post = new TwitterPost(tweetText, Integer.parseInt(favCount), status.getUser().getScreenName(), postDate, Integer.parseInt(rtCount));
+			TwitterPost post = new TwitterPost(tweetText, Integer.parseInt(favCount), user, postDate, Integer.parseInt(rtCount));
 			//writes to csv file
-			String[] tweet = {status.getUser().getScreenName(), rtCount , favCount, tweetText, postDate};
+			String[] tweet = {user, rtCount , favCount, tweetText, postDate};
 			twitterPosts.add(post);
 			writer.writeNext(tweet);
 			wcWriter.println(tweetText);

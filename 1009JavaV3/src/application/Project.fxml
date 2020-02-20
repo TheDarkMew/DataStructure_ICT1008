@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.ProjectController">
+   <children>
+      <MenuBar layoutY="-2.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Export CSV" />
+                  <MenuItem mnemonicParsing="false" text="Export Image" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <TabPane layoutY="30.0" prefHeight="370.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+        <tabs>
+          <Tab text="Statistics">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <SplitPane dividerPositions="0.530446549391069" orientation="VERTICAL" prefHeight="529.0" prefWidth="475.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <items>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                 <children>
+                                    <BarChart fx:id="barChart" prefHeight="261.0" prefWidth="898.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                      <xAxis>
+                                        <CategoryAxis side="BOTTOM" />
+                                      </xAxis>
+                                      <yAxis>
+                                        <NumberAxis side="LEFT" />
+                                      </yAxis>
+                                    </BarChart>
+                                 </children>
+                              </AnchorPane>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                 <children>
+                                    <SplitPane dividerPositions="0.38377926421404684" prefHeight="260.0" prefWidth="898.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                      <items>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                             <children>
+                                                <PieChart fx:id="pieChart" layoutX="-35.0" layoutY="-53.0" prefHeight="258.0" prefWidth="429.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                             </children>
+                                          </AnchorPane>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                             <children>
+                                                <TextArea fx:id="textArea" layoutX="130.0" layoutY="29.0" prefHeight="258.0" prefWidth="459.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                             </children>
+                                          </AnchorPane>
+                                      </items>
+                                    </SplitPane>
+                                 </children>
+                              </AnchorPane>
+                          </items>
+                        </SplitPane>
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+          <Tab text="Reddit Comments">
+               <content>
+                  <TableView fx:id="reddittableView" prefHeight="200.0" prefWidth="200.0" stylesheets="@tableview.css">
+                    <columns>
+                      <TableColumn fx:id="titleColumn" prefWidth="109.0" text="Title" />
+                      <TableColumn fx:id="scoreColumn" prefWidth="94.0" text="Score" />
+                        <TableColumn fx:id="dateColumn" prefWidth="74.0" text="Date" />
+                        <TableColumn fx:id="authorColumn" prefWidth="75.0" text="Author" />
+                        <TableColumn fx:id="subRedditColumn" prefWidth="103.0" text="Subreddit" />
+                    </columns>
+                  </TableView>
+               </content>
+          </Tab>
+            <Tab text="Twitter Comments">
+               <content>
+                  <TableView fx:id="twittertableView" prefHeight="331.0" prefWidth="600.0" stylesheets="@tableview.css">
+                    <columns>
+                      <TableColumn fx:id="userNameColumn" prefWidth="89.0" text="Username" />
+                      <TableColumn fx:id="retweetsColumn" prefWidth="90.0" text="Retweets" />
+                        <TableColumn fx:id="favouritesColumn" minWidth="5.0" prefWidth="97.0" text="Favourites" />
+                        <TableColumn fx:id="postColumn" prefWidth="73.0" text="Post" />
+                        <TableColumn fx:id="datesColumn" prefWidth="75.0" text="Dates" />
+                    </columns>
+                  </TableView>
+               </content></Tab>
+            <Tab text="WordCloud">
+               <content>
+                  <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                     <children>
+                        <ImageView pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</AnchorPane>
