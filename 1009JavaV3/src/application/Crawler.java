@@ -5,12 +5,17 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import com.opencsv.CSVWriter;
 
+import edu.stanford.nlp.pipeline.CoreDocument;
+import edu.stanford.nlp.pipeline.CoreSentence;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 import twitter4j.Query;
 import twitter4j.QueryResult;
 import twitter4j.Status;
@@ -64,9 +69,6 @@ public class Crawler {
 		System.out.println("==========CRAWLING REDDIT SEARCH==========");
 		
 		//headers to the csv to mark start and stop
-		String[] csvHeader = {"Title", "Score", "Date", "Author", "Subreddit"};
-		writer.writeNext(csvHeader);
-		String[] commentHeader = {"Username", "Score", "Date", "Comment"};
 		String [] startPost = {"START POST"};
 		String [] endPost = {"END POST"};
 		
@@ -102,7 +104,7 @@ public class Crawler {
 			List<String> postCommentCount = this.doc.select("div.search-result-link div.search-result-meta > a.search-comments").eachText();
 			
 			//writing each REDDIT POST to CSV
-			for (int i = 0; i < 15; i++) {
+			for (int i = 0; i < 10; i++) {
 				//sanitises upvotes and commentcount fields which can contain commas for large values and the word "comments/points" in order to save the numerical value as an integer for data processing
 				String points = postPoints.get(i).split(" ")[0].replace(",", "");
 				String commentCount = postCommentCount.get(i).split(" ")[0].replace(",", "");
@@ -112,20 +114,19 @@ public class Crawler {
 				String dateposted = postTimeStamps.get(i);
 				String subreddit = postSubs.get(i);
 				String link = postLinks.get(i);
+				String sentiment = genSentiment(title);
 				//saves the post to a RedditPost object
-				RedditPost post = new RedditPost(title, Integer.parseInt(points), author, dateposted, subreddit, link, Integer.parseInt(commentCount));
+				RedditPost post = new RedditPost(title, Integer.parseInt(points), author, dateposted, subreddit, link, Integer.parseInt(commentCount), sentiment);
 				//prints post header to csv
 				writer.writeNext(startPost);
 				//prints post to csv
-				String[] postContent = {title, points, dateposted, author, subreddit};
+				String[] postContent = {title, points, dateposted, author, subreddit, sentiment, link};
 				writer.writeNext(postContent);
-				//writes header for comments
-				writer.writeNext(commentHeader);
 				//crawl comments to print comments if there are comments present in the post
 				if (!commentCount.equals("0 comments")) {
 					System.out.println("====CRAWLING " + title + "======");
 					try {
-						crawlRedditComments(link+"?sort=top", writer, wcWriter, post);
+						crawlRedditComments(link+"?sort=top", writer, wcWriter, post, subreddit);
 					} catch (IOException e) {
 						System.out.println("Unable to crawl Reddit comments for data!");
 						redditPosts = null;
@@ -159,7 +160,7 @@ public class Crawler {
 		}
 	}
 
-	public void crawlRedditComments(String url, CSVWriter writer, PrintWriter wcwriter, RedditPost postname) throws IOException {
+	public void crawlRedditComments(String url, CSVWriter writer, PrintWriter wcwriter, RedditPost postname, String subreddit) throws IOException {
 		//sets JSoup Documentfor the comments page
 		Document commentsPage = Jsoup.connect(url).userAgent(
 				"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36")
@@ -187,17 +188,19 @@ public class Crawler {
 			String commentPoints = commentScore.get(i);
 			String date = commentDate.get(i);
 			String commenttxt = commentText.get(i);
+			String sentiment = genSentiment(commenttxt);
 			try {
 				points = Integer.parseInt(commentPoints.split(" ")[0].replace(",", ""));
 			}
 			catch(Exception e) {
 				points = 0;
+				commentPoints = "0";
 			}
 			
 			//creates a comment object that will be stored in the post as a list of comments.
-			RedditComment commentObj = new RedditComment(author, points, date, commenttxt);
+			RedditComment commentObj = new RedditComment(author, points, date, commenttxt, sentiment);
 			//adds to CSV
-			String[] comment = {author, commentPoints, date, commenttxt};
+			String[] comment = {author, commentPoints, date, commenttxt, subreddit, sentiment};
 			//adds comment to post
 			postname.addComment(commentObj);
 			writer.writeNext(comment);
@@ -234,9 +237,6 @@ public class Crawler {
 			System.exit(-1);
 		}
 		
-		//writes the csv header text
-		String[] header = {"Username", "Retweets", "Favourites", "Post", "Date Posted"};
-		writer.writeNext(header);
 		// creates the query to search for
 		Query userSearchQuery = new Query("(rip kobe bryant) OR (rip black mamba) OR (black mamba forever) OR (black mamba) OR (kobe bryant)");
 		userSearchQuery.setCount(25);
@@ -278,11 +278,12 @@ public class Crawler {
 		       	favCount = String.valueOf(status.getFavoriteCount());
 		       	rtCount = String.valueOf(status.getRetweetCount());
 		    }
+			String sentiment = genSentiment(tweetText);
 			postDate = status.getCreatedAt().toString();
 			//saves information to twitterpost object
-			TwitterPost post = new TwitterPost(tweetText, Integer.parseInt(favCount), user, postDate, Integer.parseInt(rtCount));
+			TwitterPost post = new TwitterPost(tweetText, Integer.parseInt(favCount), user, postDate, Integer.parseInt(rtCount), sentiment);
 			//writes to csv file
-			String[] tweet = {user, rtCount , favCount, tweetText, postDate};
+			String[] tweet = {user, rtCount , favCount, tweetText, postDate, sentiment};
 			twitterPosts.add(post);
 			writer.writeNext(tweet);
 			wcWriter.println(tweetText);
@@ -297,6 +298,31 @@ public class Crawler {
 			// TODO Auto-generated catch block
 			System.out.println("Unable to close twitter.csv!");
 		}
+	}
+	
+	public static String genSentiment(String text) {
+		
+		RedwoodConfiguration.current().clear().apply(); 
+		
+		String sentiment = "";
+		Properties props = new Properties();
+		 props.setProperty("annotators", "tokenize, ssplit, parse, sentiment");
+		 StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+		 
+		 
+		 CoreDocument coreDocument = new CoreDocument(text);
+		 pipeline.annotate(coreDocument);
+		 
+		 
+		 List<CoreSentence> sentences = coreDocument.sentences();
+		 
+		 
+		 for(CoreSentence sentence : sentences) {
+			 sentiment = sentence.sentiment();
+			
+			
+		 }
+		 return sentiment;
 	}
 	
 	//returns the generated list of reddit posts

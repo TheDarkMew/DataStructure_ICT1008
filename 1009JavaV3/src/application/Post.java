@@ -7,12 +7,12 @@ public abstract class Post {
 	private String sentiment;
 	
 
-	public Post(String title, int points, String username, String date) {
+	public Post(String title, int points, String username, String date, String sentiment) {
 		this.postContent = title;
 		this.LikeCount = points;
 		this.username = username;
 		this.PostDate = date;
-		this.sentiment = null;
+		this.sentiment = sentiment;
 	}
 
 	public String getPostContent() {
@@ -33,9 +33,5 @@ public abstract class Post {
 	
 	public String getSentiment() {
 		return sentiment;
-	}
-
-	public void setSentiment(String sentiment) {
-		this.sentiment = sentiment;
 	}
 }

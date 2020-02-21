@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,7 +25,12 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -42,6 +48,7 @@ public class ProjectController extends Application implements Initializable{
 	@FXML private TableColumn<testTable,Integer> favouritesColumn;
 	@FXML private TableColumn<testTable,String> postColumn;
 	@FXML private TableColumn<testTable,String> datesColumn;
+	@FXML private TableColumn<testTable,String> sentimentColumnT;
 	@FXML private BarChart<?,?> barChart;
 	@FXML private BarChart<?,?> barChart2;
 	@FXML private PieChart pieChart;
@@ -53,10 +60,13 @@ public class ProjectController extends Application implements Initializable{
 	@FXML private TableColumn<testRedditTable,String> dateColumn;
 	@FXML private TableColumn<testRedditTable,String> authorColumn;
 	@FXML private TableColumn<testRedditTable,String> subRedditColumn;
+	@FXML private TableColumn<testRedditTable,String> sentimentColumnR;
+	@FXML private MenuItem importCSV;
 
 	
 	private Crawler c;
 	private Analyzer a;
+	private Importer i;
 	private List<TwitterPost> tpost = null;
 	private List<RedditPost> rpost = null;
 	 
@@ -82,7 +92,7 @@ public class ProjectController extends Application implements Initializable{
 		ObservableList<testTable> dataList = FXCollections.observableArrayList(); 
 		
         	for (TwitterPost post : tpost) {
-        		testTable twitterTable = new testTable(post.getUsername(), post.getRTCount(), post.getLikeCount(), post.getPostContent(), post.getPostDate());     
+        		testTable twitterTable = new testTable(post.getUsername(), post.getRTCount(), post.getLikeCount(), post.getPostContent(), post.getPostDate(), post.getSentiment()); 
         		dataList.add(twitterTable);
         	}
         	return dataList;
@@ -92,10 +102,10 @@ public class ProjectController extends Application implements Initializable{
 	public ObservableList<testRedditTable> readCSV2() {
 		ObservableList<testRedditTable> dataList1 = FXCollections.observableArrayList();
 			for (RedditPost post : rpost) {
-				testRedditTable redditTable = new testRedditTable(post.getPostContent(), post.getLikeCount(), post.getPostDate(), post.getUsername(), post.getPostSubreddit());
+				testRedditTable redditTable = new testRedditTable(post.getPostContent(), post.getLikeCount(), post.getPostDate(), post.getUsername(), post.getPostSubreddit(), post.getSentiment());
 				dataList1.add(redditTable);
 				for (RedditComment comment : post.getCommentList()) {
-					testRedditTable redditTable2 = new testRedditTable(comment.getCommentText(), comment.getCommentScore(), comment.getCommentDate(), comment.getUsername(), "From Above Post");
+					testRedditTable redditTable2 = new testRedditTable(comment.getCommentText(), comment.getCommentScore(), comment.getCommentDate(), comment.getUsername(), "From Above Post", comment.getSentiment());
 					dataList1.add(redditTable2);
 				}
 			}
@@ -168,39 +178,100 @@ public class ProjectController extends Application implements Initializable{
 	public void startCrawling() {
 		try {
 			this.c = new Crawler();
+			
 			this.tpost = c.getTwitterPosts();
 			this.rpost = c.getRedditPosts();
 			this.a = new Analyzer(rpost, tpost);
+			
+			populateTables();
+	    	
+	    	setBarChart();
+	        
+	        setPieChart();
+	        	
+	        setStatsArea();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error!");
+			alert.setHeaderText(null);
+			alert.setContentText("Unable to crawl for data! Please try again.");
+			alert.showAndWait();
+			System.exit(-1);
 		}
+		
+		
+	}
+	
+	public void startImporting() { // String rpath, String tpath
+		try {
+//			this.i = new Importer(rpath, tpath);
+			this.i = new Importer("./reddit.csv", "./twitter.csv");
+			this.tpost = i.getTwitterPosts();
+			this.rpost = i.getRedditPosts();
+			this.a = new Analyzer(rpost, tpost);
+			
+			populateTables();
+	    	
+	    	setBarChart();
+	        
+	        setPieChart();
+	        	
+	        setStatsArea();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error!");
+			alert.setHeaderText(null);
+			alert.setContentText("Unable to import CSVs!");
+			alert.showAndWait();
+			System.exit(-1);
+		}
+		
+	}
+	
+	public void populateTables() {
+		userNameColumn.setCellValueFactory(new PropertyValueFactory<testTable, String>("userName"));
+    	retweetsColumn.setCellValueFactory(new PropertyValueFactory<testTable, Integer>("retweets"));
+    	favouritesColumn.setCellValueFactory(new PropertyValueFactory<testTable, Integer>("favourites"));
+    	postColumn.setCellValueFactory(new PropertyValueFactory<testTable, String>("post"));
+    	datesColumn.setCellValueFactory(new PropertyValueFactory<testTable, String>("dates"));
+    	sentimentColumnT.setCellValueFactory(new PropertyValueFactory<testTable, String>("sentiment"));
+    	
+    	titleColumn.setCellValueFactory(new PropertyValueFactory<testRedditTable, String>("title"));
+    	scoreColumn.setCellValueFactory(new PropertyValueFactory<testRedditTable, Integer>("score"));
+    	dateColumn.setCellValueFactory(new PropertyValueFactory<testRedditTable, String>("date"));
+    	authorColumn.setCellValueFactory(new PropertyValueFactory<testRedditTable, String>("author"));
+    	subRedditColumn.setCellValueFactory(new PropertyValueFactory<testRedditTable, String>("subReddit"));
+    	sentimentColumnR.setCellValueFactory(new PropertyValueFactory<testRedditTable, String>("sentiment"));
+    	
+    	twittertableView.setItems(readCSV());
+    	reddittableView.setItems(readCSV2());
 	}
 	
 	//initialize columns with variables as cells from testTable.java and testRedditTable.java
 	//set both tables with readCSV() and readCSV2 method
     public void initialize(URL location, ResourceBundle resources) 
     { 	
-    	startCrawling();
-		
-    	userNameColumn.setCellValueFactory(new PropertyValueFactory<testTable, String>("userName"));
-    	retweetsColumn.setCellValueFactory(new PropertyValueFactory<testTable, Integer>("retweets"));
-    	favouritesColumn.setCellValueFactory(new PropertyValueFactory<testTable, Integer>("favourites"));
-    	postColumn.setCellValueFactory(new PropertyValueFactory<testTable, String>("post"));
-    	datesColumn.setCellValueFactory(new PropertyValueFactory<testTable, String>("dates"));
-    	titleColumn.setCellValueFactory(new PropertyValueFactory<testRedditTable, String>("title"));
-    	scoreColumn.setCellValueFactory(new PropertyValueFactory<testRedditTable, Integer>("score"));
-    	dateColumn.setCellValueFactory(new PropertyValueFactory<testRedditTable, String>("date"));
-    	authorColumn.setCellValueFactory(new PropertyValueFactory<testRedditTable, String>("author"));
-    	subRedditColumn.setCellValueFactory(new PropertyValueFactory<testRedditTable, String>("subReddit"));
-    	twittertableView.setItems(readCSV());
-    	reddittableView.setItems(readCSV2());
+    	Alert alert = new Alert(AlertType.CONFIRMATION);
+    	alert.setTitle("1009 Crawler");
+    	alert.setHeaderText("Would you like to crawl for new data or import data?");
+    	alert.setContentText("Warning: Crawling for data will take a few minutes. Please be patient.\nImporting data would require an existing reddit.csv and twitter.csv.");
     	
-    	setBarChart();
-        
-        setPieChart();
-        	
-        setStatsArea();
+    	ButtonType buttonTypeOne = new ButtonType("Crawl");
+    	ButtonType buttonTypeTwo = new ButtonType("Import");
+    	ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+    	alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
+    	Optional<ButtonType> result = alert.showAndWait();
+    	if (result.get() == buttonTypeOne){
+    	    startCrawling();
+    	} else if (result.get() == buttonTypeTwo){
+    	    startImporting();
+    	}
+    	else {
+    		System.exit(0);
+    	}
        
         
     }

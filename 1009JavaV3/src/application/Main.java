@@ -13,5 +13,7 @@ public class Main {
 		//Analyzer a = new Analyzer(c.getRedditPosts(), c.getTwitterPosts());
 		
 		//otherwise, GUI will be unpopulated, users can load data to analyze
+		Importer i = new Importer("reddit.csv", "twitter.csv");
+		i.importReddit("./reddit.csv");
 	}
 }

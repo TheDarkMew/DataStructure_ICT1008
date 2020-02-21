@@ -3,17 +3,17 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 public class testTable {
-	private SimpleStringProperty userName, post, dates;
+	private SimpleStringProperty userName, post, dates, sentiment;
 	private SimpleIntegerProperty retweets, favourites;
 	
 	
-	public testTable(String userName, int retweets, int favourites,String post, String dates) {
+	public testTable(String userName, int retweets, int favourites,String post, String dates, String sentiment) {
 		this.userName = new SimpleStringProperty(userName);
 		this.retweets = new SimpleIntegerProperty(retweets);
 		this.favourites = new SimpleIntegerProperty(favourites);
 		this.post = new SimpleStringProperty(post);
 		this.dates = new SimpleStringProperty(dates);
-		
+		this.sentiment = new SimpleStringProperty(sentiment);
 	}
 	
 	public String getUserName() {
@@ -54,6 +54,14 @@ public class testTable {
 	
 	public void setDates(SimpleStringProperty dates) {
 		this.dates = dates;
+	}
+
+	public String getSentiment() {
+		return sentiment.get();
+	}
+
+	public void setSentiment(SimpleStringProperty sentiment) {
+		this.sentiment = sentiment;
 	}
 	
 

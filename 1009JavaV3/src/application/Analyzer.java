@@ -42,20 +42,11 @@ public class Analyzer {
  	
 	public Analyzer(List<RedditPost> rPosts, List<TwitterPost> tPosts) throws Exception {
 		//calling this will start analysis
-		//initSentimentAnalyzer(rPosts, tPosts);
 		//initWordCloud();
 		initStatisticsAnalyzer(rPosts, tPosts);
 	}
-	//init method for Statistics Analysis - Boon Kiat
+	//init method for Statistics Analysis - Boon Kiat & Kin Seong
 	public void initStatisticsAnalyzer(List<RedditPost> rPosts, List<TwitterPost> tPosts) {
-//		StatisticsAnalyzer s = new StatisticsAnalyzer(rPosts, tPosts);
-//		this.popularSubreddit = s.getPopularSubreddit();
-//		this.popularPost = s.getBestRedditPost();
-//		this.popularComment = s.getBestRedditComment();
-//		this.popularTweet = s.getBestTwitterPost();
-//		this.popularRT = s.getMostRTPost();
-//		this.redditStats = s.redditPostGeneralStats(); //total posts, total comments, total post upvotes, total comment upvotes
-//		this.twitterStats = s.twitterPostGeneralStats(); //total posts, total favs, total retweets
 		int [] sentstats = {0,0,0,0,0}; //sentiment stats counter
 		RedditPost bestPost = null; //best reddit post
 		RedditComment bestComment = null; //best reddit comment
@@ -98,8 +89,7 @@ public class Analyzer {
 					bestComment = rc;
 				}
 				//Sentiment Calculation
-				String textC = rc.getCommentText();
-				String sentC = genSentiment(textC);
+				String sentC = rc.getSentiment();
 				//comment.setSentiment(sentC);
 				
 				if(sentC.equals("Very Positive")) {
@@ -157,8 +147,7 @@ public class Analyzer {
 				bestRTPost = Tposts;
 			}
 			//sentiment analysis for tweet
-			String text = Tposts.getPostContent();
-			String sent = genSentiment(text);
+			String sent = Tposts.getSentiment();
 			//Tposts.setSentiment(sent);
 			
 			if(sent.equals("Very Positive")) {
@@ -190,61 +179,6 @@ public class Analyzer {
 		sentimentStats = sentstats;
 	}
 	
-	//init method for Sentiment Analysis - Kin Seong
-	public void initSentimentAnalyzer(List<RedditPost> rPosts, List<TwitterPost> tPosts) throws IOException, Exception {
-		int [] stats = {0,0,0,0,0};
-		
-		for(TwitterPost tweet : tPosts) {
-			
-			String text = tweet.getPostContent();
-			String sent = genSentiment(text);
-			//tweet.setSentiment(sent);
-			
-			if(sent.equals("Very Positive")) {
-				stats[0]++;
-			}
-			else if(sent.equals("Positive")) {
-				stats[1]++;
-			} 
-			else if(sent.equals("Neutral")) {
-				stats[2]++;
-			}
-			else if(sent.equals("Negative")) {
-				stats[3]++;
-			}
-			else if(sent.equals("Very Negative")) {
-				stats[4]++;
-			}
-		}
-		
-		for (RedditPost post : rPosts) {
-			
-			for (RedditComment comment : post.getCommentList()) {
-				String textC = comment.getCommentText();
-				String sentC = genSentiment(textC);
-				//comment.setSentiment(sentC);
-				
-				if(sentC.equals("Very Positive")) {
-					stats[0]++;
-				}
-				else if(sentC.equals("Positive")) {
-					stats[1]++;
-				} 
-				else if(sentC.equals("Neutral")) {
-					stats[2]++;
-				}
-				else if(sentC.equals("Negative")) {
-					stats[3]++;
-				}
-				else if(sentC.equals("Very Negative")) {
-					stats[4]++;
-				}
-			}
-		}
-		
-		this.sentimentStats = stats;
-	}
-	
 	//Init method for word cloud generation - Boon Kiat
 	public void initWordCloud() throws IOException {
 		//System.out.println(mostFrequentWords("/home/sangar/Documents/test.txt", 3));
@@ -265,30 +199,6 @@ public class Analyzer {
     	writer.close();
 	}
 
-	public static String genSentiment(String text) {
-		
-		RedwoodConfiguration.current().clear().apply(); 
-		
-		String sentiment = "";
-		Properties props = new Properties();
-		 props.setProperty("annotators", "tokenize, ssplit, parse, sentiment");
-		 StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-		 
-		 
-		 CoreDocument coreDocument = new CoreDocument(text);
-		 pipeline.annotate(coreDocument);
-		 
-		 
-		 List<CoreSentence> sentences = coreDocument.sentences();
-		 
-		 
-		 for(CoreSentence sentence : sentences) {
-			 sentiment = sentence.sentiment();
-			
-			
-		 }
-		 return sentiment;
-	}
 	public String getPopularSubreddit() {
 		return this.popularSubreddit;
 	}
@@ -314,130 +224,6 @@ public class Analyzer {
 		return this.sentimentStats;
 	}
 }
-
-class StatisticsAnalyzer{
-	List<RedditPost> redditPosts;
-	List<TwitterPost> twitterPosts;
-	public StatisticsAnalyzer(List<RedditPost> rPosts, List<TwitterPost> tPosts) {
-		this.redditPosts = rPosts;
-		this.twitterPosts = tPosts;
-	}
-	
-	public RedditPost getBestRedditPost() {
-		RedditPost bestPost = null;
-		int postScore = 0;
-		for (RedditPost posts : this.redditPosts) {
-			int upvotes = posts.getLikeCount();
-			if (upvotes > postScore) {
-				postScore = upvotes;
-				bestPost = posts;
-			}
-		}
-		return bestPost;
-	}
-	
-	public RedditComment getBestRedditComment() {
-		RedditComment bestComment = null;
-		int commentScore = 0;
-		for (RedditPost posts : this.redditPosts) {
-			for (RedditComment rc : posts.getCommentList()) {
-				int cscore = rc.getCommentScore();
-				if (cscore > commentScore) {
-					commentScore = cscore;
-					bestComment = rc;
-				}
-			}
-		}
-		return bestComment;
-	}
-	
-	public String getPopularSubreddit() {
-		Map<String, Integer> popSub = new HashMap<String, Integer>();
-		for (RedditPost posts : this.redditPosts) {
-			String sub = posts.getPostSubreddit();
-			if(popSub.containsKey(sub)) {
-				int currval = popSub.get(sub);
-				popSub.put(sub, currval +1);
-			}
-			else {
-				popSub.put(sub, 1);
-			}
-		}
-		
-		int occurrence = 0;
-		String max = null;
-		
-		for (Map.Entry<String, Integer> subs : popSub.entrySet()) {
-			int subval = subs.getValue();
-			if (subval > occurrence) {
-				occurrence = subval;
-				max = subs.getKey();
-			}
-		}
-		
-		return max;
-	}
-	
-	public TwitterPost getBestTwitterPost() {
-		TwitterPost bestPost = null;
-		int postScore = 0;
-		for (TwitterPost posts : this.twitterPosts) {
-			int likecount = posts.getLikeCount();
-			if (likecount > postScore) {
-				postScore = likecount;
-				bestPost = posts;
-			}
-		}
-		return bestPost;
-	}
-	
-	public TwitterPost getMostRTPost() {
-		TwitterPost bestPost = null;
-		int postScore = 0;
-		for (TwitterPost posts : this.twitterPosts) {
-			int rtcount = posts.getRTCount();
-			if (rtcount > postScore) {
-				postScore = rtcount;
-				bestPost = posts;
-			}
-		}
-		return bestPost;
-	}
-	
-	public int[] redditPostGeneralStats() {
-		int postScore = 0;
-		int commentScore = 0;
-		int totalPosts = this.redditPosts.size();
-		int totalComments = 0;
-		
-		for (RedditPost rp : this.redditPosts) {
-			postScore += rp.getLikeCount();
-			totalComments += rp.getCommentList().size();
-			for (RedditComment rc : rp.getCommentList()) {
-				commentScore += rc.getCommentScore();
-			}
-		}
-		
-		int[] stats = {totalPosts, totalComments, postScore, commentScore};
-		return stats;
-	}
-	
-	public int[] twitterPostGeneralStats() {
-		int postLikes = 0;
-		int postRTs = 0;
-		int totalPosts = this.twitterPosts.size();
-		
-		for (TwitterPost tp : this.twitterPosts) {
-			postLikes += tp.getLikeCount();
-			postRTs += tp.getRTCount();
-		}
-		
-		int[] stats = {totalPosts, postLikes, postRTs};
-		return stats;
-	}
-	
-}
-
 
 class WordCloudAnalyzer {
 	public static HashMap<String, Integer> readFile(String fileName) throws IOException {

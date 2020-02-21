@@ -7,12 +7,12 @@ public class RedditComment{
 	private String commentText; 
 	private String sentiment;
 	
-	public RedditComment(String username, int commentScore, String commentDate, String commentText) {
+	public RedditComment(String username, int commentScore, String commentDate, String commentText, String sentiment) {
 		this.username = username;
 		this.commentScore = commentScore;
 		this.commentDate = commentDate;
 		this.commentText = commentText;
-		this.sentiment = null;
+		this.sentiment = sentiment;
 	}
 
 	public String getUsername() {
@@ -35,7 +35,4 @@ public class RedditComment{
 		return sentiment;
 	}
 
-	public void setSentiment(String sentiment) {
-		this.sentiment = sentiment;
-	}
 }

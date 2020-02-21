@@ -22,8 +22,7 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem mnemonicParsing="false" text="Export CSV" />
-                  <MenuItem mnemonicParsing="false" text="Export Image" />
+              <MenuItem fx:id="importCSV" mnemonicParsing="false" onAction="#startImporting" text="Import CSV" />
             </items>
           </Menu>
         </menus>
@@ -75,11 +74,12 @@
                <content>
                   <TableView fx:id="reddittableView" prefHeight="200.0" prefWidth="200.0" stylesheets="@tableview.css">
                     <columns>
-                      <TableColumn fx:id="titleColumn" prefWidth="109.0" text="Title" />
-                      <TableColumn fx:id="scoreColumn" prefWidth="94.0" text="Score" />
-                        <TableColumn fx:id="dateColumn" prefWidth="74.0" text="Date" />
-                        <TableColumn fx:id="authorColumn" prefWidth="75.0" text="Author" />
-                        <TableColumn fx:id="subRedditColumn" prefWidth="103.0" text="Subreddit" />
+                      <TableColumn fx:id="titleColumn" minWidth="-Infinity" prefWidth="543.0" text="Title" />
+                      <TableColumn fx:id="scoreColumn" minWidth="-Infinity" prefWidth="97.0" text="Score" />
+                        <TableColumn fx:id="dateColumn" minWidth="-Infinity" prefWidth="115.0" text="Date" />
+                        <TableColumn fx:id="authorColumn" minWidth="-Infinity" prefWidth="121.0" text="Author" />
+                        <TableColumn fx:id="subRedditColumn" minWidth="-Infinity" prefWidth="170.0" text="Subreddit" />
+                        <TableColumn fx:id="sentimentColumnR" minWidth="-Infinity" prefWidth="154.0" text="Sentiment" />
                     </columns>
                   </TableView>
                </content>
@@ -88,11 +88,12 @@
                <content>
                   <TableView fx:id="twittertableView" prefHeight="331.0" prefWidth="600.0" stylesheets="@tableview.css">
                     <columns>
-                      <TableColumn fx:id="userNameColumn" prefWidth="89.0" text="Username" />
-                      <TableColumn fx:id="retweetsColumn" prefWidth="90.0" text="Retweets" />
-                        <TableColumn fx:id="favouritesColumn" minWidth="5.0" prefWidth="97.0" text="Favourites" />
-                        <TableColumn fx:id="postColumn" prefWidth="73.0" text="Post" />
-                        <TableColumn fx:id="datesColumn" prefWidth="75.0" text="Dates" />
+                      <TableColumn fx:id="userNameColumn" minWidth="-Infinity" prefWidth="194.0" text="Username" />
+                      <TableColumn fx:id="retweetsColumn" minWidth="-Infinity" prefWidth="148.0" text="Retweets" />
+                        <TableColumn fx:id="favouritesColumn" minWidth="-Infinity" prefWidth="118.0" text="Favourites" />
+                        <TableColumn fx:id="postColumn" minWidth="-Infinity" prefWidth="476.0" text="Post" />
+                        <TableColumn fx:id="datesColumn" minWidth="-Infinity" prefWidth="132.0" text="Dates" />
+                        <TableColumn fx:id="sentimentColumnT" prefWidth="132.0" text="Sentiment" />
                     </columns>
                   </TableView>
                </content></Tab>

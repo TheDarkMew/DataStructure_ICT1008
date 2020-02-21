@@ -8,8 +8,8 @@ public class RedditPost extends Post{
 	private int PostCommentCount;
 	private List<RedditComment> commentList;
 	
-	public RedditPost(String title, int points, String username, String date, String subreddit, String link, int commentCount) {
-		super(title, points, username, date);
+	public RedditPost(String title, int points, String username, String date, String subreddit, String link, int commentCount, String sentiment) {
+		super(title, points, username, date, sentiment);
 		this.PostSubreddit = subreddit;
 		this.PostLink = link;
 		this.PostCommentCount = commentCount;
@@ -37,6 +37,10 @@ public class RedditPost extends Post{
 		
 		//add it to the list
 		this.commentList.add(comment);
+	}
+	
+	public void addCommentList(List<RedditComment> comments) {
+		this.commentList = comments;
 	}
 	
 }

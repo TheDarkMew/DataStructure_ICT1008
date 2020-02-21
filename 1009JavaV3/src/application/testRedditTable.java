@@ -5,16 +5,16 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 public class testRedditTable {
-	private SimpleStringProperty title, date, author, subReddit;
+	private SimpleStringProperty title, date, author, subReddit, sentiment;
 	private SimpleIntegerProperty score;
 	
-	public testRedditTable(String title, int score, String date, String author,  String subReddit){
+	public testRedditTable(String title, int score, String date, String author,  String subReddit, String sentiment){
 		this.title = new SimpleStringProperty(title);
 		this.score = new SimpleIntegerProperty(score);
 		this.date = new SimpleStringProperty(date);
 		this.author = new SimpleStringProperty(author);
 		this.subReddit = new SimpleStringProperty(subReddit);
-
+		this.sentiment = new SimpleStringProperty(sentiment);
 	}
 
 	public String getTitle() {
@@ -57,6 +57,12 @@ public class testRedditTable {
 		this.subReddit = subReddit;
 	}
 	
-	
+	public String getSentiment() {
+		return sentiment.get();
+	}
+
+	public void setSentiment(SimpleStringProperty sentiment) {
+		this.sentiment = sentiment;
+	}
 	
 }
