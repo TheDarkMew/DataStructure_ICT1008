@@ -13,4 +13,8 @@
 		<item key="moveWizard.updateQualifiedNames" value="false"/>
 		<item key="patterns" value="*"/>
 	</section>
+	<section name="RefactoringWizard.Externalize strings in &apos;Analyzer.java&apos;">
+		<item key="width" value="737"/>
+		<item key="height" value="553"/>
+	</section>
 </section>
