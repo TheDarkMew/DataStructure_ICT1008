@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="com.google.cloud.language.v1.LanguageServiceClient"/>
+    <fullyQualifiedTypeName name="edu.stanford.nlp.pipeline.Annotation"/>
+    <fullyQualifiedTypeName name="edu.stanford.nlp.util.CoreMap"/>
+    <fullyQualifiedTypeName name="edu.stanford.nlp.ling.CoreAnnotations"/>
+    <fullyQualifiedTypeName name="java.util.Properties"/>
+    <fullyQualifiedTypeName name="edu.stanford.nlp.pipeline.StanfordCoreNLP"/>
+    <fullyQualifiedTypeName name="java.io.IOException"/>
+    <fullyQualifiedTypeName name="edu.stanford.nlp.trees.Tree"/>
+    <fullyQualifiedTypeName name="edu.stanford.nlp.neural.rnn.RNNCoreAnnotations"/>
+    <fullyQualifiedTypeName name="edu.stanford.nlp.sentiment.SentimentCoreAnnotations"/>
+    <fullyQualifiedTypeName name="edu.stanford.nlp.pipeline.CoreDocument"/>
+    <fullyQualifiedTypeName name="edu.stanford.nlp.pipeline.CoreSentence"/>
+    <fullyQualifiedTypeName name="java.util.List"/>
+    <fullyQualifiedTypeName name="edu.stanford.nlp.util.logging.RedwoodConfiguration"/>
+    <fullyQualifiedTypeName name="java.io.BufferedReader"/>
+    <fullyQualifiedTypeName name="java.io.FileReader"/>
+</qualifiedTypeNameHistroy>
